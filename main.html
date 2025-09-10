@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mastermind Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🎯 Mastermind</h1>
+  <p class="rules">
+    Try to crack the secret 4-color code in 10 tries!<br>
+    <b>Easy</b> → See per-peg hints.<br>
+    <b>Hard</b> → Totals only (right spot / right color).<br>
+    <b>Ultra Hard</b> → No history, just feedback.
+  </p>
+
+  <label for="difficulty">Choose Difficulty:</label>
+  <select id="difficulty">
+    <option value="easy">Easy</option>
+    <option value="normal" selected>Normal</option>
+    <option value="hard">Hard</option>
+  </select>
+  <br>
+  <label>
+    <input type="checkbox" id="showAnswer" checked>
+    Show answer after 10 tries
+  </label>
+  <br>
+  <button id="startBtn">Start Game</button>
+
+  <div id="gameArea" style="display:none;">
+    <h2>History</h2>
+    <ul id="history"></ul>
+
+    <div class="guess-row" id="currentGuess"></div>
+    <button id="submitBtn">Submit Guess</button>
+
+    <p id="message"></p>
+    <button id="restartBtn" style="display:none;">Restart Game</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
