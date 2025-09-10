@@ -1,0 +1,176 @@
+<!--
+Created using JS Bin
+http://jsbin.com
+
+Copyright (c) 2025 by anonymous (http://jsbin.com/cocexatuya/1/edit)
+
+Released under the MIT license: http://jsbin.mit-license.org
+-->
+<meta name="robots" content="noindex">
+<style id="jsbin-css">
+-
+</style>
+-
+<script id="jsbin-javascript">
+const colors = ["red", "blue", "green", "yellow", "purple", "orange"];
+let secretCode = [];
+let currentGuess = [];
+let attempts;
+let difficulty = "hard";
+const maxAttempts = 10;
+let revealAnswer = true;
+
+function generateCode() {
+  let code = [];
+  for (let i = 0; i < 4; i++) {
+    code.push(colors[Math.floor(Math.random() * colors.length)]);
+  }
+  return code;
+}
+
+function startGame() {
+  secretCode = generateCode();
+  attempts = 0;
+  currentGuess = Array(4).fill(colors[0]);
+
+  revealAnswer = document.getElementById("showAnswer").checked;
+
+  document.getElementById("message").textContent = "";
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("restartBtn").style.display = "none";
+
+  // Show/hide history for Ultra Hard
+  if (difficulty === "ultrahard") {
+    document.querySelector("h2").style.display = "none";
+    document.getElementById("history").style.display = "none";
+  } else {
+    document.querySelector("h2").style.display = "block";
+    document.getElementById("history").style.display = "block";
+  }
+
+  renderCurrentGuess();
+  document.getElementById("gameArea").style.display = "block";
+
+  console.log("Secret:", secretCode); // debug
+}
+
+function renderCurrentGuess() {
+  const guessRow = document.getElementById("currentGuess");
+  guessRow.innerHTML = "";
+
+  currentGuess.forEach((color, index) => {
+    const circle = document.createElement("div");
+    circle.className = "circle";
+    circle.style.background = color;
+    circle.addEventListener("click", () => changeColor(index));
+    guessRow.appendChild(circle);
+  });
+}
+
+function changeColor(index) {
+  let currentIndex = colors.indexOf(currentGuess[index]);
+  let nextIndex = (currentIndex + 1) % colors.length;
+  currentGuess[index] = colors[nextIndex];
+  renderCurrentGuess();
+}
+
+function submitGuess() {
+  attempts++;
+
+  let rightPlace = 0;
+  let rightColor = 0;
+
+  const secretCopy = [...secretCode];
+  const guessCopy = [...currentGuess];
+  const pegFeedback = Array(4).fill(null);
+
+  // Correct place check
+  for (let i = 0; i < 4; i++) {
+    if (guessCopy[i] === secretCopy[i]) {
+      rightPlace++;
+      pegFeedback[i] = "spot";
+      secretCopy[i] = null;
+      guessCopy[i] = null;
+    }
+  }
+
+  // Correct color wrong place
+  for (let i = 0; i < 4; i++) {
+    if (guessCopy[i] !== null) {
+      const index = secretCopy.indexOf(guessCopy[i]);
+      if (index !== -1) {
+        rightColor++;
+        if (!pegFeedback[i]) pegFeedback[i] = "color";
+        secretCopy[index] = null;
+      }
+    }
+  }
+
+  // History (not for ultrahard)
+  if (difficulty !== "ultrahard") {
+    const historyItem = document.createElement("li");
+
+    currentGuess.forEach((color, i) => {
+      const peg = document.createElement("div");
+      peg.className = "circle";
+      peg.style.background = color;
+      peg.style.width = "20px";
+      peg.style.height = "20px";
+
+      if (difficulty === "easy") {
+        if (pegFeedback[i] === "spot") {
+          peg.classList.add("correct-spot");
+        } else if (pegFeedback[i] === "color") {
+          peg.classList.add("correct-color");
+        }
+      }
+
+      historyItem.appendChild(peg);
+    });
+
+    const resultText = document.createElement("span");
+    if (difficulty === "hard") {
+      resultText.textContent = ` → Right spot: ${rightPlace}, Right color: ${rightColor}`;
+    }
+    historyItem.appendChild(resultText);
+
+    document.getElementById("history").appendChild(historyItem);
+  }
+
+  // Feedback text
+  if (difficulty === "ultrahard") {
+    document.getElementById("message").textContent =
+      `Right spot: ${rightPlace}, Right color: ${rightColor}`;
+  } else {
+    document.getElementById("message").textContent = "Keep trying!";
+  }
+
+  // Win condition
+  if (rightPlace === 4) {
+    document.getElementById("message").textContent =
+      `🎉 You cracked the code in ${attempts} tries!`;
+    document.getElementById("restartBtn").style.display = "inline-block";
+    return;
+  }
+
+  // Lose condition
+  if (attempts >= maxAttempts) {
+    if (revealAnswer) {
+      document.getElementById("message").textContent =
+        `❌ Game Over! The secret code was: ${secretCode.join(", ")}`;
+    } else {
+      document.getElementById("message").textContent = `❌ Game Over!`;
+    }
+    document.getElementById("restartBtn").style.display = "inline-block";
+  }
+}
+
+// Event listeners
+document.getElementById("submitBtn").addEventListener("click", submitGuess);
+document.getElementById("restartBtn").addEventListener("click", startGame);
+document.getElementById("startBtn").addEventListener("click", () => {
+  difficulty = document.getElementById("difficulty").value;
+  startGame();
+});
+
+</script>
